@@ -3,7 +3,6 @@
 import {
 	TapeRecord,
 	TuringMachine,
-	TuringMap,
 	settings
 } from "./structure.js";
 

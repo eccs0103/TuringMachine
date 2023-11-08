@@ -235,14 +235,18 @@ class Settings extends NotationProgenitor {
 		result.tape = source.tape;
 		return result;
 	}
-	/** @type {String} */ #instructions = `0(1) => 0(1) R\n0(0) => -1(1) S`;
+	/** @type {String[]} */ static #themes = [`system`, `light`, `dark`];
+	/** @readonly */ static get themes() {
+		return Object.freeze(this.#themes);
+	}
+	/** @type {String} */ #instructions = `0(1) => 0(1) R\n0(sum) => 1(1) L\n1(1) => 1(1) L\n1(0) => 2(0) R\n2(1) => -1(0) S`;
 	get instructions() {
 		return this.#instructions;
 	}
 	set instructions(value) {
 		this.#instructions = value;
 	}
-	/** @type {String} */ #tape = `1 1 1 1 1 1 1 1`;
+	/** @type {String} */ #tape = `1 1 1 1 1 1 1 1 sum 1 1 1 1`;
 	get tape() {
 		return this.#tape;
 	}
@@ -256,6 +260,18 @@ const developer = document.getElement(HTMLMetaElement, `meta[name="author"]`).co
 const title = document.getElement(HTMLMetaElement, `meta[name="application-name"]`).content;
 const containerSettings = new NotationContainer(Settings, `${developer}.${title}.Settings`);
 const settings = containerSettings.content;
+const search = location.getSearchMap();
+const theme = search.get(`theme`);
+if (theme !== undefined && Settings.themes.includes(theme)) {
+	document.documentElement.dataset[`theme`] = theme;
+}
+const reset = search.get(`reset`);
+switch (reset) {
+	case `settings`: {
+		containerSettings.reset();
+	}
+	default: break;
+}
 //#endregion
 
 export {
@@ -267,5 +283,6 @@ export {
 	TuringMachine,
 	Settings,
 	containerSettings,
-	settings
+	settings,
+	search
 };
