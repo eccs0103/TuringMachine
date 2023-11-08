@@ -1,12 +1,9 @@
 "use strict";
 
 import {
-	Directions,
-	Request,
-	Response,
+	TapeRecord,
 	TuringMachine,
 	TuringMap,
-	containerSettings,
 	settings
 } from "./structure.js";
 
@@ -33,7 +30,7 @@ void async function () {
 		});
 		//#endregion
 		//#region Output
-		/** @type {Generator<String[], String[], unknown>?} */ let generator = null;
+		/** @type {Generator<TapeRecord, TapeRecord, unknown>?} */ let generator = null;
 		inputToggleCompile.addEventListener(`change`, async (event) => {
 			try {
 				inputToggleCompile.disabled = true;
@@ -42,12 +39,12 @@ void async function () {
 						const code = textareaInstructionsField.value;
 						const lines = code.split(`\n`);
 						for (const line of lines) {
-							const [request, response] = TuringMap.parse(line);
+							const [request, response] = TapeRecord.parse(line);
 							machine.instructions.set(request, response);
 						}
 						generator = machine.launch(inputTapeField.value.split(/\s+/));
 						resolve(undefined);
-					}), 200, 1000);
+					}), 200, 600);
 				} else {
 					machine.instructions.clear();
 					divLogsField.replaceChildren();
@@ -64,20 +61,12 @@ void async function () {
 		buttonToggleLog.addEventListener(`click`, (event) => {
 			try {
 				if (generator !== null) {
-					const record = generator.next();
+					const generation = generator.next();
 					if (!done) {
-						divLogsField.append(...record.value.map((text) => {
-							const match = /^(@?)(\w+)$/.exec(text);
-							if (match === null) throw new SyntaxError(`Invalid '${text}' record`);
-							const [, mark, value] = match;
-							if (Boolean(mark)) {
-								const markElement = document.createElement(`mark`);
-								markElement.textContent = value;
-								return markElement;
-							} else return value;
-						}), document.createElement(`br`));
+						const record = generation.value;
+						divLogsField.innerHTML += `${record}<br>`;
 					}
-					done = record.done ?? true;
+					done = generation.done ?? true;
 				}
 			} catch (error) {
 				document.prevent(document.analysis(error));

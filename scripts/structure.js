@@ -9,7 +9,7 @@ import { } from "./modules/extensions.js";
 //#region Turing Machine
 /** @enum {String} */ const Directions = {
 	/** @readonly */ left: `left`,
-	/** @readonly */ onsite: `on-site`,
+	/** @readonly */ stay: `stay`,
 	/** @readonly */ right: `right`,
 };
 Object.freeze(Directions);
@@ -40,6 +40,9 @@ class Request {
 	/** @readonly */ get value() {
 		return this.#value;
 	}
+	toString() {
+		return `${this.state}(${this.value})`;
+	}
 }
 
 class Response extends Request {
@@ -53,7 +56,7 @@ class Response extends Request {
 		return new Response(Number(state), value, (() => {
 			switch (move) {
 				case `L`: return Directions.left;
-				case `S`: return Directions.onsite;
+				case `S`: return Directions.stay;
 				case `R`: return Directions.right;
 				default: throw new TypeError(`Invalid move ${move} type`);
 			}
@@ -72,12 +75,41 @@ class Response extends Request {
 	/** @readonly */ get move() {
 		return this.#move;
 	}
+	toString() {
+		return `${this.state}(${this.value}) ${this.move}`;
+	}
 }
 
 /**
  * @extends {Map<Request, Response>}
  */
 class TuringMap extends Map {
+	/**
+	 * @param {Request} key 
+	 * @returns {Response}
+	 */
+	get(key) {
+		const request = Array.from(this.keys()).find((request) => request.state === key.state && request.value === key.value);
+		return (request === undefined) ?
+			new Response(key.state, key.value, Directions.stay) :
+			super.get(request) ?? (() => { throw new ReferenceError(`Request ${request} is missing`); })();
+	}
+	/**
+	 * @param {Request} key 
+	 * @param {Response} value
+	 * @returns {this}
+	 */
+	set(key, value) {
+		const request = Array.from(this.keys()).find((request) => request.state === key.state && request.value === key.value) ?? key;
+		super.set(request, value);
+		return this;
+	}
+}
+
+/**
+ * @extends {Array<String>}
+ */
+class TapeRecord extends Array {
 	/**
 	 * @param {String} text 
 	 * @returns {[Request, Response]}
@@ -94,24 +126,21 @@ class TuringMap extends Map {
 		}
 	}
 	/**
-	 * @param {Request} key 
-	 * @returns {Response}
+	 * @param {Number} index 
+	 * @param  {String[]} items 
 	 */
-	get(key) {
-		const request = Array.from(this.keys()).find((request) => request.state === key.state && request.value === key.value);
-		return (request === undefined) ?
-			new Response(key.state, key.value, Directions.onsite) :
-			super.get(request) ?? (() => { throw new ReferenceError(`Request ${request} is missing`); })();
+	constructor(index, ...items) {
+		super(...items);
+		this.#index = index;
 	}
-	/**
-	 * @param {Request} key 
-	 * @param {Response} value
-	 * @returns {this}
-	 */
-	set(key, value) {
-		const request = Array.from(this.keys()).find((request) => request.state === key.state && request.value === key.value) ?? key;
-		super.set(request, value);
-		return this;
+	/** @type {Number} */ #index;
+	/** @readonly */ get index() {
+		return this.#index;
+	}
+	toString() {
+		const clone = this.slice();
+		clone[this.index] = `<mark>${clone[this.index]}</mark>`;
+		return clone.join(` `);
 	}
 }
 
@@ -129,22 +158,32 @@ class TuringMachine {
 	}
 	/**
 	 * @param {String[]} tape 
+	 * @returns {Generator<TapeRecord, TapeRecord, unknown>}
 	 */
 	*launch(tape) {
 		for (let index = 0, state = 0; true;) {
-			let value = (tape[index] ?? this.#initial);
+			const value = tape[index];
 			const response = this.instructions.get(new Request(state, value));
 			tape[index] = response.value;
-			const record = tape.slice();
-			record[index] = `@${record[index]}`;
+			const record = new TapeRecord(index, ...tape);
 			state = response.state;
 			if (state < 0) {
 				return record;
 			} else {
 				switch (response.move) {
-					case Directions.left: { index--; } break;
-					case Directions.onsite: { } break;
-					case Directions.right: { index++; } break;
+					case Directions.left: {
+						index--;
+						for (; index < 0; index++) {
+							tape.unshift(this.#initial);
+						}
+					} break;
+					case Directions.stay: { } break;
+					case Directions.right: {
+						index++;
+						for (; index >= tape.length;) {
+							tape.push(this.#initial);
+						}
+					} break;
 					default: throw new TypeError(`Invalid ${response.move} direction`);
 				}
 				yield record;
@@ -224,6 +263,7 @@ export {
 	Request,
 	Response,
 	TuringMap,
+	TapeRecord,
 	TuringMachine,
 	Settings,
 	containerSettings,
