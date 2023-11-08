@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="system">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="Content-Type: text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="application-name" content="">
+	<meta name="author" content="">
+	<meta name="description" content="">
+	<meta name="keywords" content="">
+	<title>Main</title>
+	<link rel="shortcut icon" href="../resources/hive.png" media="(prefers-color-scheme: light)">
+	<link rel="shortcut icon" href="../resources/hive (inverted).png" media="(prefers-color-scheme: dark)">
+	<link rel="stylesheet" href="../styles/style.css">
+	<link rel="stylesheet" href="../styles/themes/material.css">
+	<link rel="stylesheet" href="../styles/local/main.css">
+	<script type="module" src="../scripts/modules/storage.js"></script>
+	<script type="module" src="../scripts/modules/extensions.js"></script>
+	<script type="module" src="../scripts/structure.js"></script>
+	<script type="module" src="../scripts/main.js"></script>
+</head>
+
+<body class="with-padding large-padding with-gap large-gap">
+	<div class="-input-side layer rounded with-padding with-gap">
+		<textarea id="instructions-field" class="depth rounded with-padding" placeholder="Input the instructions"></textarea>
+		<input id="tape-field" type="text" class="depth rounded with-padding" placeholder="Input the tape">
+	</div>
+	<div class="-output-side layer rounded with-padding with-gap">
+		<div class="-controls-section -compiled flex with-gap">
+			<input id="toggle-compile" type="checkbox" hidden>
+			<label for="toggle-compile" class="layer rounded with-padding"></label>
+			<button id="toggle-log" class="layer rounded with-padding highlight-background">Log</button>
+		</div>
+		<div id="logs-field" contenteditable="true" aria-readonly="true" inert aria-placeholder="Wait for output" class="depth rounded with-padding"></div>
+	</div>
+	<script src="../scripts/templates/loader.js"></script>
+	<script src="../scripts/templates/popup.js"></script>
+</body>
+
+</html>

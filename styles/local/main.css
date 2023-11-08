@@ -1,0 +1,70 @@
+body {
+	position: fixed;
+	inset: 0;
+	display: grid;
+	transition: 1s;
+}
+
+@media screen and (orientation: portrait) {
+	body {
+		grid-template-rows: repeat(2, 1fr);
+	}
+}
+
+@media screen and (orientation: landscape) {
+	body {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+div.-input-side {
+	display: grid;
+	grid-template-rows: 1fr auto;
+}
+
+div.-output-side {
+	display: grid;
+	grid-template-rows: auto 1fr;
+}
+
+div.-controls-section {
+	justify-content: space-between;
+}
+
+input#toggle-compile ~ label[for="toggle-compile"] {
+	background-color: var(--color-highlight);
+	transition: 0.2s;
+}
+
+input#toggle-compile ~ label[for="toggle-compile"]::before {
+	content: "Compile";
+}
+
+input#toggle-compile:checked ~ label[for="toggle-compile"] {
+	background-color: var(--color-error);
+	transition: 0.2s;
+}
+
+input#toggle-compile:checked ~ label[for="toggle-compile"]::before {
+	content: "Decompile";
+}
+
+#instructions-field,
+#tape-field,
+#logs-field {
+	font-family: 'Consolas', 'Cascadia Mono Light', monospace !important;
+	overflow: hidden auto;
+	tab-size: 2;
+}
+
+#instructions-field:focus,
+#tape-field:focus {
+	outline-style: solid;
+	outline-color: var(--color-highlight);
+}
+
+input#toggle-compile:not(:checked) ~ button#toggle-log,
+input#toggle-compile:disabled ~ button#toggle-log {
+	display: none !important;
+}
+
