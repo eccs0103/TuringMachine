@@ -203,7 +203,7 @@ class Settings extends NotationProgenitor {
 	set instructions(value) {
 		this.#instructions = value;
 	}
-	/** @type {String} */ #tape = `1 1 1 1`;
+	/** @type {String} */ #tape = `1 1 1 1 1 1 1 1`;
 	get tape() {
 		return this.#tape;
 	}
