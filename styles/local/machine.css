@@ -7,22 +7,33 @@ body {
 
 @media screen and (orientation: portrait) {
 	body {
-		grid-template-rows: repeat(2, 1fr);
+		grid-template:
+			'input-section' 1fr
+			'output-section' 1fr
+			'footer-section' auto
+			/ 1fr
+		;
 	}
 }
 
 @media screen and (orientation: landscape) {
 	body {
-		grid-template-columns: repeat(2, 1fr);
+		grid-template:
+			'input-section output-section' 1fr
+			'footer-section footer-section' auto
+			/ 1fr 1fr
+		;
 	}
 }
 
 div.-input-side {
+	grid-area: input-section;
 	display: grid;
 	grid-template-rows: 1fr auto;
 }
 
 div.-output-side {
+	grid-area: output-section;
 	display: grid;
 	grid-template-rows: auto 1fr;
 }
@@ -68,3 +79,6 @@ input#toggle-compile:disabled ~ button#toggle-log {
 	display: none !important;
 }
 
+footer {
+	grid-area: footer-section;
+}
