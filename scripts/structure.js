@@ -33,12 +33,18 @@ class Request {
 		this.#value = value;
 	}
 	/** @type {Number} */ #state;
-	/** @readonly */ get state() {
+	get state() {
 		return this.#state;
 	}
+	set state(value) {
+		this.#state = value;
+	}
 	/** @type {String} */ #value;
-	/** @readonly */ get value() {
+	get value() {
 		return this.#value;
+	}
+	set value(value) {
+		this.#value = value;
 	}
 	toString() {
 		return `${this.state}(${this.value})`;
@@ -72,8 +78,11 @@ class Response extends Request {
 		this.#move = move;
 	}
 	/** @type {Directions} */ #move;
-	/** @readonly */ get move() {
+	get move() {
 		return this.#move;
+	}
+	set move(value) {
+		this.#move = value;
 	}
 	toString() {
 		return `${this.state}(${this.value}) ${this.move}`;
@@ -121,26 +130,31 @@ class TapeRecord extends Array {
 		try {
 			return [Request.parse(request), Response.parse(response)];
 		} catch (error) {
-			// console.log(error);
-			throw error;
+			throw new SyntaxError(`Invalid line syntax at part '${text}'`, { cause: error });
 		}
 	}
 	/**
+	 * @param {Request} request 
 	 * @param {Number} index 
-	 * @param  {String[]} items 
+	 * @param  {String[]} tape 
 	 */
-	constructor(index, ...items) {
-		super(...items);
+	constructor(request, index, tape) {
+		super(...tape);
+		this.#request = request;
 		this.#index = index;
+	}
+	/** @type {Request} */ #request;
+	/** @readonly */ get request() {
+		return this.#request;
 	}
 	/** @type {Number} */ #index;
 	/** @readonly */ get index() {
 		return this.#index;
 	}
 	toString() {
-		const clone = this.slice();
-		clone[this.index] = `<mark>${clone[this.index]}</mark>`;
-		return clone.join(` `);
+		const tape = Array.from(this);
+		tape[this.index] = `<mark>${tape[this.index]}</mark>`;
+		return tape.join(` `);
 	}
 }
 
@@ -162,31 +176,31 @@ class TuringMachine {
 	 */
 	*launch(tape) {
 		for (let index = 0, state = 0; true;) {
-			const value = tape[index];
-			const response = this.instructions.get(new Request(state, value));
-			tape[index] = response.value;
-			const record = new TapeRecord(index, ...tape);
-			state = response.state;
+			const request = new Request(state, tape[index] ?? (() => {
+				throw new RangeError(`Index ${index} is out of range [0 - ${tape.length})`);
+			})());
+			const record = new TapeRecord(request, index, tape);
 			if (state < 0) {
 				return record;
-			} else {
-				switch (response.move) {
-					case Directions.left: {
-						index--;
-						for (; index < 0; index++) {
-							tape.unshift(this.#initial);
-						}
-					} break;
-					case Directions.stay: { } break;
-					case Directions.right: {
-						index++;
-						for (; index >= tape.length;) {
-							tape.push(this.#initial);
-						}
-					} break;
-					default: throw new TypeError(`Invalid ${response.move} direction`);
-				}
-				yield record;
+			} else yield record;
+			const response = this.instructions.get(request);
+			state = response.state;
+			tape[index] = response.value;
+			switch (response.move) {
+				case Directions.left: {
+					index--;
+					for (; index < 0; index++) {
+						tape.unshift(this.#initial);
+					}
+				} break;
+				case Directions.stay: { } break;
+				case Directions.right: {
+					index++;
+					for (; index >= tape.length;) {
+						tape.push(this.#initial);
+					}
+				} break;
+				default: throw new TypeError(`Invalid ${response.move} direction`);
 			}
 		}
 	}
@@ -259,7 +273,6 @@ class Settings extends NotationProgenitor {
 const developer = document.getElement(HTMLMetaElement, `meta[name="author"]`).content;
 const title = document.getElement(HTMLMetaElement, `meta[name="application-name"]`).content;
 const containerSettings = new NotationContainer(Settings, `${developer}.${title}.Settings`);
-const settings = containerSettings.content;
 const search = location.getSearchMap();
 const theme = search.get(`theme`);
 if (theme !== undefined && Settings.themes.includes(theme)) {
@@ -272,6 +285,7 @@ switch (reset) {
 	}
 	default: break;
 }
+const settings = containerSettings.content;
 //#endregion
 
 export {

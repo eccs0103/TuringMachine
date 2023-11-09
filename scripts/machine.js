@@ -14,6 +14,7 @@ void async function () {
 		const divLogsField = document.getElement(HTMLDivElement, `div#logs-field`);
 		const inputToggleCompile = document.getElement(HTMLInputElement, `input#toggle-compile`);
 		const buttonToggleLog = document.getElement(HTMLButtonElement, `button#toggle-log`);
+		const inputStatusBar = document.getElement(HTMLInputElement, `input#status-bar`);
 
 		const machine = new TuringMachine(`0`);
 		//#endregion
@@ -42,11 +43,13 @@ void async function () {
 							machine.instructions.set(request, response);
 						}
 						generator = machine.launch(inputTapeField.value.split(/\s+/));
+						buttonToggleLog.click();
 						resolve(undefined);
 					}), 200, 600);
 				} else {
 					machine.instructions.clear();
 					divLogsField.replaceChildren();
+					inputStatusBar.value = ``;
 					generator = null;
 					done = false;
 				}
@@ -64,6 +67,7 @@ void async function () {
 					if (!done) {
 						const record = generation.value;
 						divLogsField.innerHTML += `${record}<br>`;
+						inputStatusBar.value = `state: ${record.request.state}, value: ${record.request.value}`;
 					}
 					done = generation.done ?? true;
 				}

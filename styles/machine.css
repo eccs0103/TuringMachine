@@ -3,6 +3,11 @@ body {
 	inset: 0;
 	display: grid;
 	transition: 400ms;
+	overflow: hidden;
+}
+
+body * {
+	overflow: inherit;
 }
 
 @media screen and (orientation: portrait) {
@@ -35,7 +40,7 @@ div.-input-side {
 div.-output-side {
 	grid-area: output-section;
 	display: grid;
-	grid-template-rows: auto 1fr;
+	grid-template-rows: auto 1fr auto;
 }
 
 div.-controls-section {
@@ -64,7 +69,8 @@ input#toggle-compile:checked ~ label[for="toggle-compile"]::before {
 #tape-field,
 #logs-field {
 	font-family: 'Consolas', 'Cascadia Mono Light', monospace !important;
-	overflow: hidden auto;
+	overflow: auto auto;
+	text-wrap: nowrap;
 	tab-size: 2;
 }
 
