@@ -253,7 +253,7 @@ class Settings extends NotationProgenitor {
 	/** @readonly */ static get themes() {
 		return Object.freeze(this.#themes);
 	}
-	/** @type {String} */ #instructions = `0(1) => 0(1) R\n0(sum) => 1(1) L\n1(1) => 1(1) L\n1(0) => 2(0) R\n2(1) => -1(0) S`;
+	/** @type {String} */ #instructions = `0(1) => 0(1) R\n0(sum) => 1(1) L\n1(1) => 1(1) L\n1(0) => 2(0) R\n2(1) => -1(0) R`;
 	get instructions() {
 		return this.#instructions;
 	}
