@@ -67,6 +67,7 @@ void async function () {
 					if (!done) {
 						const record = generation.value;
 						divLogsField.innerHTML += `${record}<br>`;
+						divLogsField.scrollTo({ top: divLogsField.scrollHeight });
 						inputStatusBar.value = `state: ${record.request.state}, value: ${record.request.value}`;
 					}
 					done = generation.done ?? true;
