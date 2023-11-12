@@ -19,25 +19,31 @@
 	<script type="module" src="../scripts/modules/storage.js"></script>
 	<script type="module" src="../scripts/modules/extensions.js"></script>
 	<script type="module" src="../scripts/structure.js"></script>
+	<script type="module" src="../scripts/modules/executors.js"></script>
 	<script type="module" src="../scripts/machine.js"></script>
 </head>
 
-<body class="with-padding large-padding with-gap large-gap">
+<body spellcheck="false" class="with-padding large-padding with-gap large-gap">
 	<div class="-input-side layer rounded with-padding with-gap">
-		<textarea id="instructions-field" class="depth rounded with-padding" placeholder="Input the instructions"></textarea>
-		<input id="tape-field" type="text" class="depth rounded with-padding" placeholder="Input the tape">
+		<textarea id="instructions-field" placeholder="Input the instructions" class="depth rounded with-padding"></textarea>
+		<input id="tape-field" type="text" placeholder="Input the tape" class="depth rounded with-padding">
 	</div>
 	<div class="-output-side layer rounded with-padding with-gap">
 		<div class="-controls-section -compiled flex with-gap">
 			<input id="toggle-compile" type="checkbox" hidden>
 			<label for="toggle-compile" class="layer rounded with-padding"></label>
-			<button id="toggle-log" class="layer rounded with-padding highlight-background">Log</button>
+			<div class="-log-controls flex with-gap secondary-centered">
+				<input id="toggle-auto-log" type="checkbox" hidden>
+				<label for="toggle-auto-log" class="layer rounded in-right with-padding highlight-background">Auto</label>
+				<button id="next-log" class="layer rounded in-left with-padding highlight-background">Log</button>
+				<button id="skip-logs" hidden class="layer rounded with-padding warn-background">Skip</button>
+			</div>
 		</div>
 		<div id="logs-field" contenteditable="false" aria-placeholder="Input the instructions and tape, then &quot;Compile&quot; and press &quot;Log&quot; for output" class="depth rounded with-padding"></div>
-		<input id="status-bar" type="text" class="with-padding" readonly inert>
+		<input id="status-bar" type="text" readonly inert class="with-padding">
 	</div>
 	<footer class="flex column centered">
-		<small><dfn>Working on AWT Core version 2.3.2 at 08.11.2023</dfn></small>
+		<small><dfn>Working on AWT Core version 2.3.3 at 12.11.2023</dfn></small>
 	</footer>
 	<script src="../scripts/templates/loader.js"></script>
 	<script src="../scripts/templates/popup.js"></script>

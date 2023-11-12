@@ -2,7 +2,7 @@ body {
 	position: fixed;
 	inset: 0;
 	display: grid;
-	transition: 400ms;
+	/* transition: 400ms; */
 	overflow: hidden;
 }
 
@@ -65,6 +65,11 @@ input#toggle-compile:checked ~ label[for="toggle-compile"]::before {
 	content: "Decompile";
 }
 
+input#toggle-auto-log:checked ~ label[for="toggle-auto-log"] {
+	background-color: var(--color-error);
+	transition: 0.2s;
+}
+
 #instructions-field,
 #tape-field,
 #logs-field {
@@ -80,8 +85,8 @@ input#toggle-compile:checked ~ label[for="toggle-compile"]::before {
 	outline-color: var(--color-highlight);
 }
 
-input#toggle-compile:not(:checked) ~ button#toggle-log,
-input#toggle-compile:disabled ~ button#toggle-log {
+input#toggle-compile:not(:checked) ~ div.-log-controls,
+input#toggle-compile:disabled ~ div.-log-controls {
 	display: none !important;
 }
 

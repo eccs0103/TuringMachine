@@ -95,6 +95,14 @@ class Response extends Request {
 class TuringMap extends Map {
 	/**
 	 * @param {Request} key 
+	 * @returns {Boolean}
+	 */
+	has(key) {
+		const request = Array.from(this.keys()).find((request) => request.state === key.state && request.value === key.value);
+		return (request !== undefined);
+	}
+	/**
+	 * @param {Request} key 
 	 * @returns {Response}
 	 */
 	get(key) {
@@ -110,8 +118,7 @@ class TuringMap extends Map {
 	 */
 	set(key, value) {
 		const request = Array.from(this.keys()).find((request) => request.state === key.state && request.value === key.value) ?? key;
-		super.set(request, value);
-		return this;
+		return super.set(request, value);
 	}
 }
 
@@ -172,17 +179,16 @@ class TuringMachine {
 	}
 	/**
 	 * @param {String[]} tape 
-	 * @returns {Generator<TapeRecord, TapeRecord, unknown>}
+	 * @returns {Generator<TapeRecord>}
 	 */
-	*launch(tape) {
+	*compile(tape) {
 		for (let index = 0, state = 0; true;) {
 			const request = new Request(state, tape[index] ?? (() => {
 				throw new RangeError(`Index ${index} is out of range [0 - ${tape.length})`);
 			})());
 			const record = new TapeRecord(request, index, tape);
-			if (state < 0) {
-				return record;
-			} else yield record;
+			yield record;
+			if (state < 0) return;
 			const response = this.instructions.get(request);
 			state = response.state;
 			tape[index] = response.value;
@@ -205,12 +211,35 @@ class TuringMachine {
 		}
 	}
 }
+
+/**
+ * @template T
+ */
+class Factory {
+	/**
+	 * @param {Generator<T>} generator 
+	 */
+	constructor(generator) {
+		this.#generator = generator;
+		this.#generation = this.#generator.next();
+	}
+	/** @type {Generator<T>} */ #generator;
+	/** @type {IteratorResult<T>} */ #generation;
+	async produce() {
+		if (!this.#generation.done) {
+			const result = this.#generation.value;
+			this.#generation = this.#generator.next();
+			return result;
+		} else throw new ReferenceError(`Generation does not exist`);
+	}
+}
 //#endregion
 //#region Settings
 /**
  * @typedef SettingsNotation
  * @property {String} [instructions]
  * @property {String} [tape]
+ * @property {Boolean} [auto]
  */
 
 class Settings extends NotationProgenitor {
@@ -237,6 +266,13 @@ class Settings extends NotationProgenitor {
 			}
 			result.tape = tape;
 		}
+		const auto = Reflect.get(source, `auto`);
+		if (auto !== undefined) {
+			if (!(typeof (auto) === `boolean`)) {
+				throw new TypeError(`Property auto has invalid ${typeof (auto)} type`);
+			}
+			result.auto = auto;
+		}
 		return result;
 	}
 	/**
@@ -247,6 +283,7 @@ class Settings extends NotationProgenitor {
 		const result = (/** @type {SettingsNotation} */ ({}));
 		result.instructions = source.instructions;
 		result.tape = source.tape;
+		result.auto = source.auto;
 		return result;
 	}
 	/** @type {String[]} */ static #themes = [`system`, `light`, `dark`];
@@ -267,6 +304,13 @@ class Settings extends NotationProgenitor {
 	set tape(value) {
 		this.#tape = value;
 	}
+	/** @type {Boolean} */ #auto = false;
+	get auto() {
+		return this.#auto;
+	}
+	set auto(value) {
+		this.#auto = value;
+	}
 }
 //#endregion
 //#region Metadata
@@ -285,6 +329,13 @@ switch (reset) {
 	}
 	default: break;
 }
+const experimental = (() => {
+	switch (search.get(`experimental`)) {
+		case `on`: return true;
+		case `off`: return false;
+		default: return false;
+	}
+})();
 const settings = containerSettings.content;
 //#endregion
 
@@ -295,8 +346,10 @@ export {
 	TuringMap,
 	TapeRecord,
 	TuringMachine,
+	Factory,
 	Settings,
 	containerSettings,
 	settings,
-	search
+	search,
+	experimental,
 };
